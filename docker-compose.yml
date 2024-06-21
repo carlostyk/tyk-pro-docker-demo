@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   tyk-dashboard:
-    image: tykio/tyk-dashboard:${DASHBOARD_VERSION:-v5.3.0}
+    image: tykio/tyk-dashboard:${DASHBOARD_VERSION:-v5.4.0-rc3}
     container_name: tyk-dashboard
     environment:
       - TYK_DB_LICENSEKEY=${DASH_LICENSE:?License key missing from Docker environment file "".env" file.  Review The Getting Started steps in README.md.}
@@ -29,7 +29,7 @@ services:
       - tyk
 
   tyk-gateway:
-    image: tykio/tyk-gateway:${GATEWAY_VERSION:-v5.3.0}
+    image: tykio/tyk-gateway:${GATEWAY_VERSION:-v5.3.0-rc3}
     container_name: tyk-gateway
     ports:
       - "8080:8080"
@@ -83,6 +83,35 @@ services:
 
     networks:
       - tyk
+
+    # Jaeger
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    networks:
+      - tyk
+    ports:
+      - "16686:16686"
+      - "14268"
+      - "14250"
+
+  # Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./deployments/otel-collector/otel-collector.yml:/etc/otel-collector.yml
+    command: [ "--config=/etc/otel-collector.yml" ]
+    networks:
+      - tyk
+    ports:
+      - "1888:1888"   # pprof extension
+      - "13133:13133" # health_check extension
+      - "55670:55679" # zpages extension
+      - "4317"          # OTLP over gRPC receiver
+      - "4318:4318"     # OTLP over HTTP receiver
+      - "9464"          # Prometheus exporter
+      - "8888"          # metrics endpoint
+    depends_on:
+      - jaeger-all-in-one
   
 volumes:
   redis-data:
