@@ -98,7 +98,7 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     volumes:
-      - ./deployments/otel-collector/otel-collector.yml:/etc/otel-collector.yml
+      - ./confs/otel-collector.yml:/etc/otel-collector.yml
     command: [ "--config=/etc/otel-collector.yml" ]
     networks:
       - tyk
