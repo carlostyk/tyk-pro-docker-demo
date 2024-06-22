@@ -35,6 +35,8 @@ services:
       - "8080:8080"
     env_file:
       - ./confs/tyk.env
+    volumes:
+      - ./confs/tyk.conf:/opt/tyk-gateway/tyk.conf
     networks:
       - tyk
 
